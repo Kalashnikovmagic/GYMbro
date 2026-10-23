@@ -31,6 +31,17 @@
       <button class="primary" value="default">Сохранить видео</button>
     </form>
   </dialog>
+  <dialog id="recordDialog">
+    <form method="dialog" id="recordForm">
+      <div class="dialog-head"><div><p class="eyebrow">РЕЗУЛЬТАТ</p><h2 id="recordTitle">Новый вес</h2></div><button class="close" value="cancel" aria-label="Закрыть">×</button></div>
+      <input type="hidden" id="recordId"><input type="hidden" id="recordExerciseId">
+      <label>Вес, кг<input id="recordWeight" type="number" min="0" step="0.01" inputmode="decimal" required></label>
+      <label>Дата<input id="recordDate" type="date" required></label>
+      <label>Повторения <input id="recordReps" type="number" min="1" step="1" inputmode="numeric" placeholder="Необязательно"></label>
+      <label>Заметка <input id="recordNote" maxlength="70" placeholder="Необязательно"></label>
+      <button class="primary" value="default">Сохранить результат</button>
+    </form>
+  </dialog>
   <script src="app.js"></script>
 </body>
 </html>
