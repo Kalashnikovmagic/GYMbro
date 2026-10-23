@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#91f35b">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>GYMbro — тренировки</title>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div><p class="eyebrow">ТВОЙ ТРЕНИРОВОЧНЫЙ ЖУРНАЛ</p><h1>GYM<span>bro</span></h1></div>
+      <button class="icon-button" id="installBtn" title="Установить приложение" hidden>↓</button>
+    </header>
+    <section class="summary" id="summary"></section>
+    <nav class="tabs" aria-label="Разделы">
+      <button class="tab active" data-view="today">Тренировка</button>
+      <button class="tab" data-view="progress">Прогресс</button>
+      <button class="tab" data-view="library">Техника</button>
+    </nav>
+    <section id="today" class="view active"></section>
+    <section id="progress" class="view"></section>
+    <section id="library" class="view"></section>
+  </main>
+  <dialog id="workoutDialog">
+    <form method="dialog" id="setForm">
+      <div class="dialog-head"><div><p class="eyebrow">НОВЫЙ ПОДХОД</p><h2 id="dialogTitle">Упражнение</h2></div><button class="close" value="cancel" aria-label="Закрыть">×</button></div>
+      <input type="hidden" id="exerciseId">
+      <label>Вес, кг<input id="weight" type="number" min="0" step="0.5" inputmode="decimal" required></label>
+      <label>Повторения<input id="reps" type="number" min="1" step="1" inputmode="numeric" required></label>
+      <label>Заметка <input id="note" maxlength="70" placeholder="Например: запас 2 повтора"></label>
+      <button class="primary" value="default">Сохранить подход</button>
+    </form>
+  </dialog>
+  <dialog id="exerciseDialog">
+    <form method="dialog" id="exerciseForm">
+      <div class="dialog-head"><div><p class="eyebrow">НОВОЕ УПРАЖНЕНИЕ</p><h2>Добавить в журнал</h2></div><button class="close" value="cancel" aria-label="Закрыть">×</button></div>
+      <label>Название<input id="newName" required maxlength="45" placeholder="Например: Сгибание рук"></label>
+      <label>Тренажёр / группа<input id="newGroup" required maxlength="35" placeholder="Например: Бицепс"></label>
+      <label>Ссылка на видео <input id="newVideo" type="url" placeholder="https://youtube.com/..."></label>
+      <button class="primary" value="default">Добавить упражнение</button>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
