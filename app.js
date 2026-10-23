@@ -53,7 +53,7 @@ function openRecord(exerciseId,recordId){
   $("#recordWeight").value=record?record.weight:"";$("#recordDate").value=record?record.date:today;$("#recordReps").value=record&&record.reps?record.reps:"";$("#recordNote").value=record?record.note||"":"";$("#recordDialog").showModal();$("#recordWeight").focus();
 }
 
-const youtube=url=>{const m=url.match(/(?:youtu.be\/|v=|embed\/)([\w-]{11})/);return m?`<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${m[1]}" title="Видео техники" allowfullscreen></iframe>`:""};
+const youtube=url=>{const m=url.match(/(?:youtu.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?`<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${m[1]}" title="Видео техники" allowfullscreen></iframe>`:""};
 function renderLibrary(){
   $("#library").innerHTML='<div class="section-title"><div><p class="eyebrow">ТЕХНИКА И ВИДЕО</p><h2>Выполняй уверенно</h2></div></div>'+
   data.exercises.map(function(e){
