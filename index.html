@@ -24,7 +24,7 @@
   </main>
   <dialog id="videoDialog">
     <form method="dialog" id="videoForm">
-      <div class="dialog-head"><div><p class="eyebrow">ВИДЕО ТЕХНИКИ</p><h2 id="videoTitle">Упражнение</h2></div><button class="close" value="cancel" aria-label="Закрыть">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">ВИДЕО ТЕХНИКИ</p><h2 id="videoTitle">Упражнение</h2></div><button type="button" class="close" aria-label="Закрыть">×</button></div>
       <input type="hidden" id="videoExerciseId">
       <label>Ссылка на YouTube<input id="videoUrl" type="url" placeholder="https://youtu.be/..."></label>
       <p class="form-hint">Вставьте ссылку на ролик — он появится прямо в карточке упражнения.</p>
@@ -33,7 +33,7 @@
   </dialog>
   <dialog id="recordDialog">
     <form method="dialog" id="recordForm">
-      <div class="dialog-head"><div><p class="eyebrow">РЕЗУЛЬТАТ</p><h2 id="recordTitle">Новый вес</h2></div><button class="close" value="cancel" aria-label="Закрыть">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">РЕЗУЛЬТАТ</p><h2 id="recordTitle">Новый вес</h2></div><button type="button" class="close" aria-label="Закрыть">×</button></div>
       <input type="hidden" id="recordId"><input type="hidden" id="recordExerciseId">
       <label>Вес, кг<input id="recordWeight" type="number" min="0" step="0.01" inputmode="decimal" required></label>
       <label>Дата<input id="recordDate" type="date" required></label>
