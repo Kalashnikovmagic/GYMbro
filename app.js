@@ -21,7 +21,15 @@ const getSets=id=>data.sets.filter(s=>s.exerciseId===id).sort((a,b)=>b.date.loca
 function summary(){const sets=data.sets.filter(s=>s.date===today&&!s.imported),volume=sets.reduce((n,s)=>n+s.weight*s.reps,0);$("#summary").innerHTML=`<div class="stat"><b>${sets.length}</b><small>подходов сегодня</small></div><div class="stat"><b>${volume.toLocaleString("ru-RU")}</b><small>кг объёма</small></div><div class="stat"><b>${data.exercises.length}</b><small>упражнений</small></div>`}
 function card(e){const sets=getSets(e.id).filter(s=>s.date===today&&!s.imported);return `<article class="exercise-card"><div class="exercise-top"><div><h3>${esc(e.name)}</h3><p>${esc(e.group)}</p></div><span class="pill">${sets.length?sets.length+" подх.":"ещё нет"}</span></div><div class="set-list">${sets.length?sets.map((s,i)=>`<span class="set">${i+1}: <b>${s.weight} кг × ${s.reps}</b></span>`).join(""):'<span class="set">Добавь первый подход</span>'}</div><button class="secondary add-set" data-id="${e.id}">+ Записать подход</button></article>`}
 function renderToday(){const groups=[...new Set(data.exercises.map(e=>e.group))];$("#today").innerHTML=`<div class="section-title"><div><p class="eyebrow">СЕГОДНЯ · ${dateLabel(today)}</p><h2>Текущая тренировка</h2></div><button class="secondary" id="addExercise">+ Упражнение</button></div>${groups.map(g=>`<section><div class="section-title"><h2>${esc(g)}</h2></div>${data.exercises.filter(e=>e.group===g).map(card).join("")}</section>`).join("")}`;document.querySelectorAll(".add-set").forEach(b=>b.onclick=()=>openSet(b.dataset.id));$("#addExercise").onclick=()=>$("#exerciseDialog").showModal()}
-function chart(points){if(!points.length)return '<div class="empty">Пока нет записей для графика.</div>';const max=Math.max(...points.map(p=>p.weight),1),min=Math.min(...points.map(p=>p.weight),0),range=Math.max(max-min,1),c=points.map((p,i)=>({x:14+i*17,y:76-(p.weight-min)/range*58}));return `<div class="chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line class="axis" x1="0" y1="76" x2="100" y2="76"/><polyline class="line" points="${c.map(p=>p.x+","+p.y).join(" ")}"/>${c.map((p,i)=>`<circle class="dot" cx="${p.x}" cy="${p.y}" r="3"/><text x="${p.x}" y="94" text-anchor="middle" fill="#9ba7ae" font-size="7">${points[i].imported?"этап "+(i+1):dateLabel(points[i].date)}</text>`).join("")}</svg></div>`}
+function chart(points,exerciseId){
+  if(!points.length)return '<div class="empty">Пока нет записей для графика.</div>';
+  const max=Math.max(...points.map(p=>p.weight),1),min=Math.min(...points.map(p=>p.weight),0),range=Math.max(max-min,1);
+  const coords=points.map((point,index)=>({x:18+index*29,y:43-(point.weight-min)/range*28}));
+  const line=coords.map(point=>point.x+","+point.y).join(" ");
+  return '<div class="chart"><svg viewBox="0 0 300 60" aria-label="Динамика веса"><polyline class="line" points="'+line+'"/>'+
+    coords.map((point,index)=>'<circle class="dot chart-dot" data-record="'+points[index].id+'" data-exercise="'+exerciseId+'" cx="'+point.x+'" cy="'+point.y+'" r="5"/>').join("")+
+    '</svg><p class="chart-value" id="chart-value-'+exerciseId+'">Нажмите на точку, чтобы увидеть вес</p></div>';
+}
 function recordChips(points){
   return '<div class="record-list">'+points.map(function(point,index){
     const label=point.imported?"этап "+(index+1):dateLabel(point.date);
@@ -32,10 +40,11 @@ function renderProgress(){
   $("#progress").innerHTML='<div class="section-title"><div><p class="eyebrow">ИМПОРТИРОВАННАЯ ИСТОРИЯ + НОВЫЕ РЕЗУЛЬТАТЫ</p><h2>Прогресс по весу</h2></div></div>'+
   data.exercises.map(function(exercise){
     const points=getSets(exercise.id).slice(0,12).reverse(),best=points.length?Math.max(...points.map(function(item){return item.weight})):0;
-    return '<article class="progress-card"><header><div><h3>'+esc(exercise.name)+'</h3><p>'+ (points.length?'Лучший вес: '+best+' кг':'Добавьте первый вес')+'</p></div><div class="card-actions"><span class="pill">'+points.length+' записей</span><button class="secondary add-record" data-id="'+exercise.id+'">+ Вес</button></div></header>'+chart(points)+recordChips(points)+'</article>';
+    return '<article class="progress-card"><header><div><h3>'+esc(exercise.name)+'</h3><p>'+ (points.length?'Лучший вес: '+best+' кг':'Добавьте первый вес')+'</p></div><div class="card-actions"><span class="pill">'+points.length+' записей</span><button class="secondary add-record" data-id="'+exercise.id+'">+ Вес</button></div></header>'+chart(points,exercise.id)+recordChips(points)+'</article>';
   }).join("");
   document.querySelectorAll(".add-record").forEach(function(button){button.onclick=function(){openRecord(button.dataset.id)}});
-  document.querySelectorAll(".edit-record").forEach(function(button){button.onclick=function(){openRecord(null,button.dataset.id)}});
+  document.querySelectorAll(".chart-dot").forEach(dot=>dot.onclick=()=>{const point=data.sets.find(item=>item.id===dot.dataset.record);if(!point)return;const info=point.imported?"История":dateLabel(point.date);const reps=point.reps?" × "+point.reps:"";$("#chart-value-"+dot.dataset.exercise).textContent=info+": "+point.weight+" кг"+reps});
+document.querySelectorAll(".edit-record").forEach(function(button){button.onclick=function(){openRecord(null,button.dataset.id)}});
 }
 function openRecord(exerciseId,recordId){
   const record=recordId?data.sets.find(function(item){return item.id===recordId}):null;
