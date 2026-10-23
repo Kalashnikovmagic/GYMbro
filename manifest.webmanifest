@@ -1,0 +1,13 @@
+{
+  "name": "GYMbro — дневник тренировок",
+  "short_name": "GYMbro",
+  "description": "Личный журнал тренировок и прогресса",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0c1016",
+  "theme_color": "#91f35b",
+  "lang": "ru",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
