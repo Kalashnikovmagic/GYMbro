@@ -13,7 +13,7 @@ const stageDate=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
 const imported=catalog.flatMap(([id,,,[...weights],note])=>weights.map((weight,i)=>({exerciseId:id,weight,reps:null,note:note||"Импортированный результат",date:stageDate(weights.length-i),created:Date.now()-(weights.length-i)*86400000,imported:true})));
 const data=stored||{exercises:initialExercises,sets:[],importVersion:0};
 if((data.importVersion||0)<1){const ids=new Set(data.exercises.map(e=>e.id));data.exercises.push(...initialExercises.filter(e=>!ids.has(e.id)));data.sets.push(...imported);data.importVersion=1;localStorage.setItem(key,JSON.stringify(data))}
-const recordIdsChanged=data.sets.some((entry,index)=>{if(entry.id)return false;entry.id="record-"+(entry.created||Date.now())+"-"+index;return true});if(recordIdsChanged)localStorage.setItem(key,JSON.stringify(data));
+let recordIdsChanged=false;data.sets.forEach((entry,index)=>{if(!entry.id){entry.id="record-"+(entry.created||Date.now())+"-"+index;recordIdsChanged=true}});if(recordIdsChanged)localStorage.setItem(key,JSON.stringify(data));
 const $=s=>document.querySelector(s),save=()=>localStorage.setItem(key,JSON.stringify(data)),today=new Date().toISOString().slice(0,10);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const dateLabel=d=>new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(d+"T12:00:00"));
