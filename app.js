@@ -7,32 +7,21 @@ const catalog=[
 ["leg-press","Жим ногами","Ноги",[150]],["leg-curl","Сгибание ног","Ноги",[57,70]],["leg-extension","Разгибание ног","Ноги",[57,70]],["hack-squat","Hack Squat","Ноги",[50]],["calf-raise","Икры (голень стоя)","Ноги",[65]]
 ];
 const tips={Спина:"Сохраняй нейтральную спину и начинай тягу движением лопаток.",Грудь:"Лопатки собраны, плечи не уходят вперёд в верхней точке.",Плечи:"Держи корпус устойчиво и контролируй вес без рывков.",Бицепс:"Зафиксируй локти и не раскачивай корпус.",Трицепс:"Локти держи стабильно; разгибай руку плавно.",Ноги:"Колени направляй по линии носков, работай в комфортной амплитуде."};
-const curatedVideos={
-  "lower-row":"https://www.youtube.com/watch?v=KbINn6CNBfw",
-  "lat-pulldown":"https://www.youtube.com/watch?v=uuCuDD73W20",
-  "wide-pullups":"https://www.youtube.com/watch?v=GjVvFGSc-JM",
-  "incline-dumbbell":"https://www.youtube.com/watch?v=ZixeFw_iHVY",
-  "chest-press":"https://www.youtube.com/watch?v=egmmkPdXV0g",
-  "machine-chest-press":"https://www.youtube.com/watch?v=egmmkPdXV0g",
-  "horizontal-chest":"https://www.youtube.com/watch?v=egmmkPdXV0g",
-  "smith-bench":"https://www.youtube.com/watch?v=mjobtgEbAc4",
-  "machine-shoulder-press":"https://www.youtube.com/watch?v=Gkk-6q7Rq-s",
-  "shoulder-press-new":"https://www.youtube.com/watch?v=Gkk-6q7Rq-s",
-  "overhead-press":"https://www.youtube.com/watch?v=Gkk-6q7Rq-s",
-  "cross-cable":"https://www.youtube.com/watch?v=C64pUMkv0jQ",
-  "preacher-curl":"https://www.youtube.com/watch?v=dnJ1vNlhzHY",
-  "triceps-pushdown":"https://www.youtube.com/watch?v=i14hrj7l7CI",
-  "leg-curl":"https://www.youtube.com/watch?v=BXXaYSW2Ozw",
-  "leg-extension":"https://www.youtube.com/watch?v=LXEjArwexT4"
-};
-const videoSearchUrl=name=>"https://www.youtube.com/results?search_query="+encodeURIComponent(name+" техника выполнения");
-const initialExercises=catalog.map(([id,name,group])=>({id,name,group,tip:tips[group],video:curatedVideos[id]||"",searchUrl:videoSearchUrl(name)}));
+const autoVideoUrls=new Set([
+  "https://www.youtube.com/watch?v=KbINn6CNBfw","https://www.youtube.com/watch?v=uuCuDD73W20",
+  "https://www.youtube.com/watch?v=GjVvFGSc-JM","https://www.youtube.com/watch?v=ZixeFw_iHVY",
+  "https://www.youtube.com/watch?v=egmmkPdXV0g","https://www.youtube.com/watch?v=mjobtgEbAc4",
+  "https://www.youtube.com/watch?v=Gkk-6q7Rq-s","https://www.youtube.com/watch?v=C64pUMkv0jQ",
+  "https://www.youtube.com/watch?v=dnJ1vNlhzHY","https://www.youtube.com/watch?v=i14hrj7l7CI",
+  "https://www.youtube.com/watch?v=BXXaYSW2Ozw","https://www.youtube.com/watch?v=LXEjArwexT4"
+]);
+const initialExercises=catalog.map(([id,name,group])=>({id,name,group,tip:tips[group],video:""}));
 const key="gymbro-data-v1", stored=JSON.parse(localStorage.getItem(key)||"null");
 const stageDate=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
 const imported=catalog.flatMap(([id,,,[...weights],note])=>weights.map((weight,i)=>({exerciseId:id,weight,reps:null,note:note||"Импортированный результат",date:stageDate(weights.length-i),created:Date.now()-(weights.length-i)*86400000,imported:true})));
 const data=stored||{exercises:initialExercises,sets:[],importVersion:0};
 if((data.importVersion||0)<1){const ids=new Set(data.exercises.map(e=>e.id));data.exercises.push(...initialExercises.filter(e=>!ids.has(e.id)));data.sets.push(...imported);data.importVersion=1;localStorage.setItem(key,JSON.stringify(data))}
-let videosChanged=false;data.exercises.forEach(exercise=>{if(!exercise.video&&curatedVideos[exercise.id]){exercise.video=curatedVideos[exercise.id];videosChanged=true}if(!exercise.searchUrl){exercise.searchUrl=videoSearchUrl(exercise.name);videosChanged=true}});if(videosChanged)localStorage.setItem(key,JSON.stringify(data));
+if(!data.removedAutoVideosV1){data.exercises.forEach(exercise=>{if(autoVideoUrls.has(exercise.video))exercise.video=""});data.removedAutoVideosV1=true;localStorage.setItem(key,JSON.stringify(data))}
 let recordIdsChanged=false;data.sets.forEach((entry,index)=>{if(!entry.id){entry.id="record-"+(entry.created||Date.now())+"-"+index;recordIdsChanged=true}});if(recordIdsChanged)localStorage.setItem(key,JSON.stringify(data));
 const $=s=>document.querySelector(s),save=()=>localStorage.setItem(key,JSON.stringify(data)),today=new Date().toISOString().slice(0,10);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -77,7 +66,7 @@ const videoEmbed=url=>{const youtube=url.match(/(?:youtu.be\/|v=|embed\/|shorts\
 function renderLibrary(){
   $("#library").innerHTML='<div class="section-title"><div><p class="eyebrow">ТЕХНИКА И ВИДЕО</p><h2>Выполняй уверенно</h2></div></div>'+
   data.exercises.map(function(e){
-    const video=e.video?videoEmbed(e.video):'<a class="secondary search-video" href="'+e.searchUrl+'" target="_blank" rel="noopener">Найти видео на YouTube ↗</a>';
+    const video=e.video?videoEmbed(e.video):'<p class="empty">Видеоссылка пока не добавлена.</p>';
     return '<article class="library-card"><div class="exercise-top"><div><h3>'+esc(e.name)+'</h3><p>'+esc(e.group)+'</p></div><button class="secondary video-link" data-id="'+e.id+'">'+(e.video?'Изменить видео':'＋ Видео')+'</button></div><div class="tip">'+esc(e.tip||"Добавь подсказку по технике.")+'</div>'+video+'</article>';
   }).join("");
   document.querySelectorAll(".video-link").forEach(function(button){button.onclick=function(){openVideo(button.dataset.id)}});
