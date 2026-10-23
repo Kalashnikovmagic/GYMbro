@@ -53,11 +53,11 @@ function openRecord(exerciseId,recordId){
   $("#recordWeight").value=record?record.weight:"";$("#recordDate").value=record?record.date:today;$("#recordReps").value=record&&record.reps?record.reps:"";$("#recordNote").value=record?record.note||"":"";$("#recordDialog").showModal();$("#recordWeight").focus();
 }
 
-const youtube=url=>{const m=url.match(/(?:youtu.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?`<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${m[1]}" title="Видео техники" allowfullscreen></iframe>`:""};
+const videoEmbed=url=>{const youtube=url.match(/(?:youtu.be\/|v=|embed\/|shorts\/)([\w-]{11})/);if(youtube)return `<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${youtube[1]}" title="Видео техники с YouTube" allowfullscreen></iframe>`;const reel=url.match(/instagram\.com\/(?:reel|reels)\/([^/?#]+)/i);if(reel)return `<iframe class="video reel" loading="lazy" src="https://www.instagram.com/reel/${reel[1]}/embed/" title="Видео техники из Instagram" allowfullscreen></iframe>`;return '<p class="empty">Поддерживаются ссылки YouTube, Shorts и Instagram Reels.</p>'};
 function renderLibrary(){
   $("#library").innerHTML='<div class="section-title"><div><p class="eyebrow">ТЕХНИКА И ВИДЕО</p><h2>Выполняй уверенно</h2></div></div>'+
   data.exercises.map(function(e){
-    const video=e.video?youtube(e.video):'<p class="empty">Видеоссылка пока не добавлена.</p>';
+    const video=e.video?videoEmbed(e.video):'<p class="empty">Видеоссылка пока не добавлена.</p>';
     return '<article class="library-card"><div class="exercise-top"><div><h3>'+esc(e.name)+'</h3><p>'+esc(e.group)+'</p></div><button class="secondary video-link" data-id="'+e.id+'">'+(e.video?'Изменить видео':'＋ Видео')+'</button></div><div class="tip">'+esc(e.tip||"Добавь подсказку по технике.")+'</div>'+video+'</article>';
   }).join("");
   document.querySelectorAll(".video-link").forEach(function(button){button.onclick=function(){openVideo(button.dataset.id)}});
