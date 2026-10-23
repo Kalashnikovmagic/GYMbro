@@ -1,48 +1,30 @@
-const seedExercises=[
-  {id:"leg-press",name:"Жим ногами",group:"Ноги · тренажёр",tip:"Поясница плотно прижата к спинке; колени следуют за носками.",video:""},
-  {id:"chest-press",name:"Жим от груди",group:"Грудь · тренажёр",tip:"Сведи лопатки и не выводи плечи вперёд в верхней точке.",video:""},
-  {id:"lat-pulldown",name:"Тяга верхнего блока",group:"Спина · блок",tip:"Тяни локтями вниз, корпус держи устойчиво, не запрокидывайся.",video:""},
-  {id:"leg-curl",name:"Сгибание ног лёжа",group:"Бёдра · тренажёр",tip:"Не отрывай таз от подушки; движение плавное и подконтрольное.",video:""},
-  {id:"shoulder-press",name:"Жим на плечи",group:"Плечи · тренажёр",tip:"Держи нейтральную спину и не выпрямляй локти до щелчка.",video:""}
+const catalog=[
+["lower-row","Тяга снизу","Спина",[50,60]],["lat-pulldown","Тяга сверху","Спина",[50,60]],["wide-pullups","Подтягивания широким хватом","Спина",[21.88,18.75,15.63,12.5,9.38],"Доп. отметка: 47 → 40"],["back-row","Back Press (ROW)","Спина",[58.5,67.5,76.5]],
+["incline-dumbbell","Жим гантелей на наклонной скамье","Грудь",[16,18,20,22,24]],["hammer-press","Жим в хаммере","Грудь",[30,35],"Вес указан для каждой стороны (×2)"],["chest-press","Chest Press","Грудь",[58.5,67.5,76.5]],["assisted-dips","Брусья в тренажёре","Грудь",[40.5,49.5,58.5,67.5]],["smith-bench","Жим штанги в Смите","Грудь",[45]],["machine-chest-press","Жим от груди в тренажёре","Грудь",[50,57.5]],["horizontal-chest","Горизонтальный жим от груди","Грудь",[35,40],"Вес указан для каждой стороны (×2)"],
+["seated-dumbbell-press","Жим гантелей сидя","Плечи",[16,18]],["side-raise-support","Подъём гантели через сторону","Плечи",[8],"С опорой"],["machine-shoulder-press","Жим вверх в тренажёре","Плечи",[35]],["lateral-raise","Жим в стороны (Lateral Raise)","Плечи",[22.5,31.5,40.5,49.5]],["overhead-press","Overhead Press","Плечи",[40.5,49.5]],["cross-cable","Перекрёстная тяга в кроссовере","Плечи",[2.3,3.75]],["shoulder-press-new","Жим от плеч (NEW)","Плечи",[32,36,41,45]],["rear-delt","Дельта-машина","Плечи",[36,41]],
+["hammer-curl","Молоты","Бицепс",[12,14]],["barbell-curl","Подъём штанги стоя","Бицепс",[20,25]],["preacher-curl","Скотт в тренажёре","Бицепс",[31.5,40.5]],["biceps-machine","Бицепс-машина (NEW)","Бицепс",[27,32,36,41]],
+["triceps-pushdown","Разгибание с блоком стоя","Трицепс",[15,17.5,18.75,21.25,23.75]],["overhead-triceps","Разгибание с блоком из-за спины","Трицепс",[16.25,18.75]],
+["leg-press","Жим ногами","Ноги",[150]],["leg-curl","Сгибание ног","Ноги",[57,70]],["leg-extension","Разгибание ног","Ноги",[57,70]],["hack-squat","Hack Squat","Ноги",[50]],["calf-raise","Икры (голень стоя)","Ноги",[65]]
 ];
-const key="gymbro-data-v1";
-const data=JSON.parse(localStorage.getItem(key)||"null")||{exercises:seedExercises,sets:[]};
-const $=s=>document.querySelector(s);
-const save=()=>localStorage.setItem(key,JSON.stringify(data));
-const today=new Date().toISOString().slice(0,10);
-function dateLabel(date){return new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(date+"T12:00:00"))}
-function esc(text){return String(text).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function getSets(id){return data.sets.filter(s=>s.exerciseId===id).sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created)}
-function summary(){
- const todaySets=data.sets.filter(s=>s.date===today); const volume=todaySets.reduce((n,s)=>n+s.weight*s.reps,0);
- $("#summary").innerHTML=`<div class="stat"><b>${todaySets.length}</b><small>подходов сегодня</small></div><div class="stat"><b>${volume.toLocaleString("ru-RU")}</b><small>кг объёма</small></div><div class="stat"><b>${data.exercises.length}</b><small>упражнений</small></div>`;
-}
-function renderToday(){
- const html=data.exercises.map(e=>{const sets=getSets(e.id).filter(s=>s.date===today);
- return `<article class="exercise-card"><div class="exercise-top"><div><h3>${esc(e.name)}</h3><p>${esc(e.group)}</p></div><span class="pill">${sets.length?sets.length+" подх.":"ещё нет"}</span></div><div class="set-list">${sets.length?sets.map((s,i)=>`<span class="set">${i+1}: <b>${s.weight} кг × ${s.reps}</b></span>`).join(""):'<span class="set">Добавь первый подход</span>'}</div><button class="secondary add-set" data-id="${e.id}">+ Записать подход</button></article>`}).join("");
- $("#today").innerHTML=`<div class="section-title"><div><p class="eyebrow">СЕГОДНЯ · ${dateLabel(today)}</p><h2>Текущая тренировка</h2></div><button class="secondary" id="addExercise">+ Упражнение</button></div>${html}`;
- document.querySelectorAll(".add-set").forEach(b=>b.onclick=()=>openSet(b.dataset.id)); $("#addExercise").onclick=()=>$("#exerciseDialog").showModal();
-}
-function chart(points){
- if(!points.length)return '<div class="empty">Пока нет записей для графика.</div>';
- const max=Math.max(...points.map(p=>p.weight),1),min=Math.min(...points.map(p=>p.weight),0),range=Math.max(max-min,1);
- const coords=points.map((p,i)=>({x:points.length===1?50:i/(points.length-1)*100,y:112-(p.weight-min)/range*90}));
- const line=coords.map(p=>p.x+","+p.y).join(" ");
- return `<div class="chart"><svg viewBox="0 0 100 130" preserveAspectRatio="none"><line class="axis" x1="0" y1="112" x2="100" y2="112"/><polyline class="line" points="${line}"/>${coords.map((p,i)=>`<circle class="dot" cx="${p.x}" cy="${p.y}" r="3"/><text x="${p.x}" y="127" text-anchor="middle" fill="#9ba7ae" font-size="7">${dateLabel(points[i].date)}</text>`).join("")}</svg></div>`;
-}
-function renderProgress(){
- const cards=data.exercises.map(e=>{const sets=getSets(e.id).slice(0,12).reverse();const best=sets.length?Math.max(...sets.map(s=>s.weight)):0;
- return `<article class="progress-card"><header><div><h3>${esc(e.name)}</h3><p>${sets.length?"Лучший вес: "+best+" кг":"Запиши подход, чтобы увидеть динамику"}</p></div><span class="pill">${sets.length} записей</span></header>${chart(sets)}</article>`}).join("");
- $("#progress").innerHTML=`<div class="section-title"><div><p class="eyebrow">ТВОЯ ДИНАМИКА</p><h2>Прогресс по весу</h2></div></div>${cards}`;
-}
-function youtube(url){const match=url.match(/(?:youtu.be\/|v=|embed\/)([\w-]{11})/);return match?`<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${match[1]}" title="Видео техники" allowfullscreen></iframe>`:""}
-function renderLibrary(){
- $("#library").innerHTML=`<div class="section-title"><div><p class="eyebrow">ТРЕНИРУЙСЯ ОСОЗНАННО</p><h2>Техника</h2></div></div>${data.exercises.map(e=>`<article class="library-card"><h3>${esc(e.name)}</h3><p>${esc(e.group)}</p><div class="tip">${esc(e.tip||"Добавь подсказку по технике для этого упражнения.")}</div>${e.video?youtube(e.video):'<p class="empty">Для этого упражнения можно добавить видеоссылку при создании упражнения.</p>'}</article>`).join("")}`;
-}
-function render(){summary();renderToday();renderProgress();renderLibrary()}
-function openSet(id){const e=data.exercises.find(x=>x.id===id);$("#exerciseId").value=id;$("#dialogTitle").textContent=e.name;$("#weight").value="";$("#reps").value="";$("#note").value="";$("#workoutDialog").showModal();$("#weight").focus()}
-$("#setForm").addEventListener("submit",event=>{event.preventDefault();data.sets.push({exerciseId:$("#exerciseId").value,weight:Number($("#weight").value),reps:Number($("#reps").value),note:$("#note").value.trim(),date:today,created:Date.now()});save();$("#workoutDialog").close();render()});
-$("#exerciseForm").addEventListener("submit",event=>{event.preventDefault();const name=$("#newName").value.trim();data.exercises.push({id:"custom-"+Date.now(),name,group:$("#newGroup").value.trim(),tip:"Выбери комфортный вес и контролируй движение без рывков.",video:$("#newVideo").value.trim()});save();$("#exerciseDialog").close();event.target.reset();render()});
-document.querySelectorAll(".tab").forEach(tab=>tab.onclick=()=>{document.querySelectorAll(".tab,.view").forEach(x=>x.classList.remove("active"));tab.classList.add("active");$("#"+tab.dataset.view).classList.add("active")});
-let deferred;window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferred=event;$("#installBtn").hidden=false});$("#installBtn").onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;$("#installBtn").hidden=true}};
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");render();
+const tips={Спина:"Сохраняй нейтральную спину и начинай тягу движением лопаток.",Грудь:"Лопатки собраны, плечи не уходят вперёд в верхней точке.",Плечи:"Держи корпус устойчиво и контролируй вес без рывков.",Бицепс:"Зафиксируй локти и не раскачивай корпус.",Трицепс:"Локти держи стабильно; разгибай руку плавно.",Ноги:"Колени направляй по линии носков, работай в комфортной амплитуде."};
+const initialExercises=catalog.map(([id,name,group])=>({id,name,group,tip:tips[group],video:""}));
+const key="gymbro-data-v1", stored=JSON.parse(localStorage.getItem(key)||"null");
+const stageDate=n=>new Date(Date.now()-n*86400000).toISOString().slice(0,10);
+const imported=catalog.flatMap(([id,,,[...weights],note])=>weights.map((weight,i)=>({exerciseId:id,weight,reps:null,note:note||"Импортированный результат",date:stageDate(weights.length-i),created:Date.now()-(weights.length-i)*86400000,imported:true})));
+const data=stored||{exercises:initialExercises,sets:[],importVersion:0};
+if((data.importVersion||0)<1){const ids=new Set(data.exercises.map(e=>e.id));data.exercises.push(...initialExercises.filter(e=>!ids.has(e.id)));data.sets.push(...imported);data.importVersion=1;localStorage.setItem(key,JSON.stringify(data))}
+const $=s=>document.querySelector(s),save=()=>localStorage.setItem(key,JSON.stringify(data)),today=new Date().toISOString().slice(0,10);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dateLabel=d=>new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(d+"T12:00:00"));
+const getSets=id=>data.sets.filter(s=>s.exerciseId===id).sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created);
+function summary(){const sets=data.sets.filter(s=>s.date===today&&!s.imported),volume=sets.reduce((n,s)=>n+s.weight*s.reps,0);$("#summary").innerHTML=`<div class="stat"><b>${sets.length}</b><small>подходов сегодня</small></div><div class="stat"><b>${volume.toLocaleString("ru-RU")}</b><small>кг объёма</small></div><div class="stat"><b>${data.exercises.length}</b><small>упражнений</small></div>`}
+function card(e){const sets=getSets(e.id).filter(s=>s.date===today&&!s.imported);return `<article class="exercise-card"><div class="exercise-top"><div><h3>${esc(e.name)}</h3><p>${esc(e.group)}</p></div><span class="pill">${sets.length?sets.length+" подх.":"ещё нет"}</span></div><div class="set-list">${sets.length?sets.map((s,i)=>`<span class="set">${i+1}: <b>${s.weight} кг × ${s.reps}</b></span>`).join(""):'<span class="set">Добавь первый подход</span>'}</div><button class="secondary add-set" data-id="${e.id}">+ Записать подход</button></article>`}
+function renderToday(){const groups=[...new Set(data.exercises.map(e=>e.group))];$("#today").innerHTML=`<div class="section-title"><div><p class="eyebrow">СЕГОДНЯ · ${dateLabel(today)}</p><h2>Текущая тренировка</h2></div><button class="secondary" id="addExercise">+ Упражнение</button></div>${groups.map(g=>`<section><div class="section-title"><h2>${esc(g)}</h2></div>${data.exercises.filter(e=>e.group===g).map(card).join("")}</section>`).join("")}`;document.querySelectorAll(".add-set").forEach(b=>b.onclick=()=>openSet(b.dataset.id));$("#addExercise").onclick=()=>$("#exerciseDialog").showModal()}
+function chart(points){if(!points.length)return '<div class="empty">Пока нет записей для графика.</div>';const max=Math.max(...points.map(p=>p.weight),1),min=Math.min(...points.map(p=>p.weight),0),range=Math.max(max-min,1),c=points.map((p,i)=>({x:points.length===1?50:i/(points.length-1)*100,y:112-(p.weight-min)/range*90}));return `<div class="chart"><svg viewBox="0 0 100 130" preserveAspectRatio="none"><line class="axis" x1="0" y1="112" x2="100" y2="112"/><polyline class="line" points="${c.map(p=>p.x+","+p.y).join(" ")}"/>${c.map((p,i)=>`<circle class="dot" cx="${p.x}" cy="${p.y}" r="3"/><text x="${p.x}" y="127" text-anchor="middle" fill="#9ba7ae" font-size="7">${points[i].imported?"этап "+(i+1):dateLabel(points[i].date)}</text>`).join("")}</svg></div>`}
+function renderProgress(){$("#progress").innerHTML=`<div class="section-title"><div><p class="eyebrow">ИМПОРТИРОВАННАЯ ИСТОРИЯ + НОВЫЕ ПОДХОДЫ</p><h2>Прогресс по весу</h2></div></div>${data.exercises.map(e=>{const s=getSets(e.id).slice(0,12).reverse(),best=s.length?Math.max(...s.map(x=>x.weight)):0;return `<article class="progress-card"><header><div><h3>${esc(e.name)}</h3><p>${s.length?"Лучший вес: "+best+" кг":"Запиши подход, чтобы увидеть динамику"}</p></div><span class="pill">${s.length} записей</span></header>${chart(s)}</article>`}).join("")}`}
+const youtube=url=>{const m=url.match(/(?:youtu.be\/|v=|embed\/)([\w-]{11})/);return m?`<iframe class="video" loading="lazy" src="https://www.youtube-nocookie.com/embed/${m[1]}" title="Видео техники" allowfullscreen></iframe>`:""};
+function renderLibrary(){$("#library").innerHTML=`<div class="section-title"><div><p class="eyebrow">ТРЕНИРУЙСЯ ОСОЗНАННО</p><h2>Техника</h2></div></div>${data.exercises.map(e=>`<article class="library-card"><h3>${esc(e.name)}</h3><p>${esc(e.group)}</p><div class="tip">${esc(e.tip||"Добавь подсказку по технике.")}</div>${e.video?youtube(e.video):'<p class="empty">Добавь ссылку на YouTube при создании упражнения.</p>'}</article>`).join("")}`}
+function render(){summary();renderToday();renderProgress();renderLibrary()}function openSet(id){const e=data.exercises.find(x=>x.id===id);$("#exerciseId").value=id;$("#dialogTitle").textContent=e.name;$("#weight").value="";$("#reps").value="";$("#note").value="";$("#workoutDialog").showModal();$("#weight").focus()}
+$("#setForm").addEventListener("submit",e=>{e.preventDefault();data.sets.push({exerciseId:$("#exerciseId").value,weight:Number($("#weight").value),reps:Number($("#reps").value),note:$("#note").value.trim(),date:today,created:Date.now()});save();$("#workoutDialog").close();render()});
+$("#exerciseForm").addEventListener("submit",e=>{e.preventDefault();data.exercises.push({id:"custom-"+Date.now(),name:$("#newName").value.trim(),group:$("#newGroup").value.trim(),tip:"Выбери комфортный вес и контролируй движение без рывков.",video:$("#newVideo").value.trim()});save();$("#exerciseDialog").close();e.target.reset();render()});
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab,.view").forEach(x=>x.classList.remove("active"));t.classList.add("active");$("#"+t.dataset.view).classList.add("active")});let deferred;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;$("#installBtn").hidden=false});$("#installBtn").onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;$("#installBtn").hidden=true}};if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js");render();
